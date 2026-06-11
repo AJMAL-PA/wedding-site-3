@@ -2519,7 +2519,7 @@
           </div>
 
           <h1 class="couple-names reveal reveal-delay-1">
-            <span class="shiny-text">Akhil ummer</span>
+            <span class="shiny-text">Akhil Ummer</span>
             <span class="amp">&</span>
             <span class="shiny-text">Fathima Haifa</span>
           </h1>
@@ -2636,22 +2636,22 @@
           <!-- Program 1: Nikah Ceremony -->
           <div class="glass-card card-nikah">
             <div>
-              <h3 class="card-title">Nikah Ceremony</h3>
+              <h3 class="card-title">Wedding Ceremony</h3>
               <div class="card-divider-gold"></div>
 
               <div class="card-details">
                 <div class="card-detail-item">
                   <span class="ev-icon">☽</span>
                   <div class="ev-label">Occasion</div>
-                  <div class="ev-val">Nikah</div>
+                  <div class="ev-val">wedding</div>
                   <div class="ev-sub">Islamic Marriage</div>
                 </div>
 
                 <div class="card-detail-item">
                   <span class="ev-icon">◈</span>
-                  <div class="ev-label">Date &amp; Time</div>
-                  <div class="ev-val">July 11, 2026</div>
-                  <div class="ev-sub">SATURDAY . 4:30 PM</div>
+                  <div class="ev-label">Date</div>
+                  <div class="ev-val">July 8, 2026</div>
+                  
                 </div>
 
                 <div class="card-detail-item">
@@ -2849,8 +2849,8 @@
     </div>
   </footer>
 
-  <!-- Audio Element -->
-  <audio id="bg-music" src="assets/aud.MP3.mpeg" loop playsinline preload="auto"></audio>
+  <!-- Audio Element (Hidden/Disabled) -->
+  <!-- <audio id="bg-music" src="assets/aud.MP3.mpeg" loop playsinline preload="auto"></audio> -->
 
   <script>
     /* ================================================================
@@ -3217,6 +3217,7 @@
       function startScratch(x, y) {
         if (scratchComplete) return;
 
+        /*
         if (!audioUnlocked) {
           const bgMusic = document.getElementById('bg-music');
           if (bgMusic) {
@@ -3225,6 +3226,7 @@
           }
           audioUnlocked = true;
         }
+        */
 
         isScratching = true;
         lastX = x;
@@ -3559,12 +3561,14 @@
       if (window._stopStars) window._stopStars();
       main.style.display = 'block';
 
-      // Start music
+      // Start music (disabled)
+      /*
       const bgMusic = document.getElementById('bg-music');
       if (bgMusic) {
         bgMusic.volume = 0.5;
         bgMusic.play().catch(e => console.log("Audio play failed:", e));
       }
+      */
 
       document.body.classList.remove('no-scroll');
       requestAnimationFrame(() => {
