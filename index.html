@@ -2869,9 +2869,37 @@
   </footer>
 
   <!-- Audio Element (Hidden) -->
-  <audio id="bg-music" src="assets/WhatsApp Audio 2026-06-13 at 12.46.02 PM.mpeg" loop playsinline preload="auto"></audio>
+  <audio id="bg-music" src="assets/WhatsApp%20Audio%202026-06-13%20at%2012.46.02%20PM.mpeg" loop playsinline preload="auto"></audio>
 
   <script>
+    /* ================================================================
+       GLOBAL AUDIO UNLOCKER FOR IOS & ANDROID
+    ================================================================ */
+    let isAudioUnlocked = false;
+    (function () {
+      function unlock() {
+        if (isAudioUnlocked) return;
+        const bgMusic = document.getElementById('bg-music');
+        if (bgMusic) {
+          const originalVolume = bgMusic.volume || 0.5;
+          bgMusic.muted = true;
+          bgMusic.play().then(() => {
+            bgMusic.pause();
+            bgMusic.muted = false;
+            bgMusic.volume = originalVolume;
+            isAudioUnlocked = true;
+            // Clean up event listeners
+            window.removeEventListener('click', unlock, { capture: true });
+            window.removeEventListener('touchstart', unlock, { capture: true });
+          }).catch(e => {
+            console.log("Audio unlock failed on gesture:", e);
+          });
+        }
+      }
+      window.addEventListener('click', unlock, { capture: true, passive: true });
+      window.addEventListener('touchstart', unlock, { capture: true, passive: true });
+    })();
+
     /* ================================================================
        PRELOADER CANVAS ANIMATION (White & Green Theme)
     ================================================================ */
@@ -3230,28 +3258,9 @@
         trailRAF = requestAnimationFrame(updateCursorTrail);
       }
 
-      let audioUnlocked = false;
-
       // Scratch interaction
       function startScratch(x, y) {
         if (scratchComplete) return;
-
-        if (!audioUnlocked) {
-          const bgMusic = document.getElementById('bg-music');
-          if (bgMusic) {
-            // Play and pause immediately on first touch (with muted state) to unlock programmatic audio on iOS
-            const originalVolume = bgMusic.volume || 0.5;
-            bgMusic.muted = true;
-            bgMusic.play().then(() => {
-              bgMusic.pause();
-              bgMusic.muted = false;
-              bgMusic.volume = originalVolume;
-              audioUnlocked = true;
-            }).catch(e => {
-              console.log("Audio unlock failed:", e);
-            });
-          }
-        }
 
         isScratching = true;
         lastX = x;
