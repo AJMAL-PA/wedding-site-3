@@ -2426,6 +2426,93 @@
         transform: translateY(0);
       }
     }
+
+    /* Floating Music Toggle Button */
+    .music-toggle-btn {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: rgba(48, 98, 58, 0.45); /* var(--dark) with opacity */
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 1px solid rgba(212, 175, 55, 0.35); /* var(--gold) with opacity */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 9999;
+      opacity: 0;
+      visibility: hidden;
+      transform: scale(0.8);
+      transition: opacity 0.8s ease, transform 0.8s ease, visibility 0.8s;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2), 0 0 10px rgba(212, 175, 55, 0.15);
+    }
+
+    .music-toggle-btn.visible {
+      opacity: 1;
+      visibility: visible;
+      transform: scale(1);
+    }
+
+    .music-toggle-btn:hover {
+      transform: scale(1.08);
+      border-color: var(--gold-hi);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(212, 175, 55, 0.3);
+    }
+
+    .music-toggle-btn:active {
+      transform: scale(0.95);
+    }
+
+    .music-icon-wrapper {
+      position: relative;
+      width: 22px;
+      height: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Animated sound waves */
+    .sound-wave {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      width: 18px;
+      height: 14px;
+    }
+
+    .sound-wave span {
+      width: 3px;
+      height: 100%;
+      background-color: var(--gold);
+      border-radius: 1px;
+      transform-origin: bottom;
+      animation: bounceWave 1.2s ease-in-out infinite alternate;
+    }
+
+    .sound-wave span:nth-child(1) { animation-delay: 0.1s; height: 30%; }
+    .sound-wave span:nth-child(2) { animation-delay: 0.3s; height: 100%; }
+    .sound-wave span:nth-child(3) { animation-delay: 0s;   height: 60%; }
+    .sound-wave span:nth-child(4) { animation-delay: 0.2s; height: 80%; }
+
+    .music-toggle-btn.paused .sound-wave span {
+      animation-play-state: paused;
+      height: 25% !important;
+      background-color: var(--gold-lo);
+    }
+
+    @keyframes bounceWave {
+      0% {
+        transform: scaleY(0.2);
+      }
+      100% {
+        transform: scaleY(1);
+      }
+    }
   </style>
 </head>
 
@@ -2868,37 +2955,76 @@
     </div>
   </footer>
 
+  <!-- Floating Music Toggle -->
+  <button id="music-toggle" class="music-toggle-btn" aria-label="Toggle Background Music">
+    <div class="music-icon-wrapper">
+      <div class="sound-wave">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+  </button>
+
   <!-- Audio Element (Hidden) -->
-  <audio id="bg-music" src="assets/WhatsApp%20Audio%202026-06-13%20at%2012.46.02%20PM.mpeg" loop playsinline preload="auto"></audio>
+  <audio id="bg-music" src="assets/bg-music.mp3" loop playsinline preload="auto"></audio>
 
   <script>
     /* ================================================================
-       GLOBAL AUDIO UNLOCKER FOR IOS & ANDROID
+       GLOBAL AUDIO UNLOCKER & CONTROLLER FOR IOS & ANDROID
     ================================================================ */
     let isAudioUnlocked = false;
-    (function () {
-      function unlock() {
-        if (isAudioUnlocked) return;
-        const bgMusic = document.getElementById('bg-music');
-        if (bgMusic) {
-          const originalVolume = bgMusic.volume || 0.5;
-          bgMusic.muted = true;
-          bgMusic.play().then(() => {
+
+    // Initialize toggle button and synchronization listeners
+    document.addEventListener('DOMContentLoaded', () => {
+      const musicToggle = document.getElementById('music-toggle');
+      const bgMusic = document.getElementById('bg-music');
+
+      if (musicToggle && bgMusic) {
+        musicToggle.addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (bgMusic.paused) {
+            bgMusic.volume = 0.5;
+            bgMusic.play()
+              .then(() => {
+                musicToggle.classList.remove('paused');
+              })
+              .catch(err => console.log("Play failed on toggle click:", err));
+          } else {
             bgMusic.pause();
-            bgMusic.muted = false;
-            bgMusic.volume = originalVolume;
+            musicToggle.classList.add('paused');
+          }
+        });
+
+        bgMusic.addEventListener('play', () => {
+          musicToggle.classList.remove('paused');
+        });
+        bgMusic.addEventListener('pause', () => {
+          musicToggle.classList.add('paused');
+        });
+      }
+    });
+
+    function unlockAudio() {
+      if (isAudioUnlocked) return;
+      const bgMusic = document.getElementById('bg-music');
+      if (bgMusic) {
+        bgMusic.volume = 0.5;
+        bgMusic.play()
+          .then(() => {
             isAudioUnlocked = true;
-            // Clean up event listeners
-            window.removeEventListener('click', unlock, { capture: true });
-            window.removeEventListener('touchstart', unlock, { capture: true });
-          }).catch(e => {
+            console.log("Audio unlocked successfully");
+            window.removeEventListener('click', unlockAudio, { capture: true });
+            window.removeEventListener('touchstart', unlockAudio, { capture: true });
+          })
+          .catch(e => {
             console.log("Audio unlock failed on gesture:", e);
           });
-        }
       }
-      window.addEventListener('click', unlock, { capture: true, passive: true });
-      window.addEventListener('touchstart', unlock, { capture: true, passive: true });
-    })();
+    }
+    window.addEventListener('click', unlockAudio, { capture: true, passive: true });
+    window.addEventListener('touchstart', unlockAudio, { capture: true, passive: true });
 
     /* ================================================================
        PRELOADER CANVAS ANIMATION (White & Green Theme)
@@ -3266,6 +3392,17 @@
         lastX = x;
         lastY = y;
         if (hint) hint.style.display = 'none';
+
+        // Unlock/play audio immediately on user starting to scratch
+        const bgMusic = document.getElementById('bg-music');
+        if (bgMusic && bgMusic.paused) {
+          bgMusic.volume = 0.5;
+          bgMusic.play()
+            .then(() => {
+              isAudioUnlocked = true;
+            })
+            .catch(e => console.log("Audio play deferred during startScratch:", e));
+        }
       }
 
       function doScratch(x, y) {
@@ -3314,6 +3451,16 @@
 
       function endScratch() {
         isScratching = false;
+
+        // Fallback: If scratch is complete but music isn't playing (due to gesture policy on move),
+        // try playing it on touch/mouse release which is a valid user gesture.
+        if (scratchComplete) {
+          const bgMusic = document.getElementById('bg-music');
+          if (bgMusic && bgMusic.paused) {
+            bgMusic.volume = 0.5;
+            bgMusic.play().catch(e => console.log("Audio play failed on endScratch:", e));
+          }
+        }
       }
 
       // Mouse events
@@ -3374,11 +3521,13 @@
         // Hide the hint
         if (hint) hint.style.display = 'none';
 
-        // Play background audio
+        // Play background audio & show floating toggle button
         const bgMusic = document.getElementById('bg-music');
+        const musicToggle = document.getElementById('music-toggle');
+        if (musicToggle) musicToggle.classList.add('visible');
         if (bgMusic) {
           bgMusic.volume = 0.5;
-          bgMusic.play().catch(e => console.log("Audio play failed:", e));
+          bgMusic.play().catch(e => console.log("Audio play failed on completeReveal:", e));
         }
 
         // Reveal all remaining letters with staggered animation
@@ -3604,9 +3753,11 @@
 
       // Start music
       const bgMusic = document.getElementById('bg-music');
+      const musicToggle = document.getElementById('music-toggle');
+      if (musicToggle) musicToggle.classList.add('visible');
       if (bgMusic && bgMusic.paused) {
         bgMusic.volume = 0.5;
-        bgMusic.play().catch(e => console.log("Audio play failed:", e));
+        bgMusic.play().catch(e => console.log("Audio play failed on enterMainPage:", e));
       }
 
       document.body.classList.remove('no-scroll');
