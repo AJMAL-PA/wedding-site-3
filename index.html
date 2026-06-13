@@ -3236,16 +3236,22 @@
       function startScratch(x, y) {
         if (scratchComplete) return;
 
-        /*
         if (!audioUnlocked) {
           const bgMusic = document.getElementById('bg-music');
           if (bgMusic) {
-            bgMusic.volume = 0.5;
-            bgMusic.play().catch(e => console.log("Audio unlock failed:", e));
+            // Play and pause immediately on first touch (with muted state) to unlock programmatic audio on iOS
+            const originalVolume = bgMusic.volume || 0.5;
+            bgMusic.muted = true;
+            bgMusic.play().then(() => {
+              bgMusic.pause();
+              bgMusic.muted = false;
+              bgMusic.volume = originalVolume;
+              audioUnlocked = true;
+            }).catch(e => {
+              console.log("Audio unlock failed:", e);
+            });
           }
-          audioUnlocked = true;
         }
-        */
 
         isScratching = true;
         lastX = x;
